@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getDashboard } from "../api/dashboard";
+import "../style/DashboardPage.css";
 
 type DashboardData = {
   products: number;
@@ -32,10 +33,10 @@ export default function DashboardPage() {
   if (!data) return <h2>Ошибка загрузки</h2>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="dashboard">
       <h1>Dashboard</h1>
 
-      <div style={{ display: "flex", gap: 20 }}>
+      <div className="dashboard-cards">
         <Card title="Товары" value={data.products} />
         <Card title="Заказы" value={data.orders} />
         <Card title="Выручка" value={`${data.revenue} ₽`} />
@@ -53,14 +54,7 @@ function Card({
   value: string | number;
 }) {
   return (
-    <div
-      style={{
-        padding: 20,
-        border: "1px solid #ccc",
-        borderRadius: 10,
-        minWidth: 150,
-      }}
-    >
+    <div className="card">
       <h3>{title}</h3>
       <h2>{value}</h2>
     </div>

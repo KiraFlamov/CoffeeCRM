@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../api/products";
 import { createOrder } from "../api/orders";
+import "../style/POSPage.css";
 
 type Product = {
   id: number;
@@ -96,70 +97,35 @@ export default function POSPage() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: "40px",
-      }}
-    >
-      <div style={{ flex: 1 }}>
+    <div className="pos-page">
+      <div className="pos-main">
         <h2>Товары</h2>
 
         {products.map((product) => (
-          <div
-            key={product.id}
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          >
+          <div key={product.id} className="product-item">
             <h4>{product.name}</h4>
 
             <p>{product.price} ₽</p>
 
-            <button
-              onClick={() => addToCart(product)}
-            >
-              Добавить
-            </button>
+            <button onClick={() => addToCart(product)}>Добавить</button>
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          width: "350px",
-          borderLeft: "1px solid #ddd",
-          paddingLeft: "20px",
-        }}
-      >
+      <div className="pos-cart">
         <h2>Корзина</h2>
 
-        {cart.length === 0 && (
-          <p>Корзина пустая</p>
-        )}
+        {cart.length === 0 && <p>Корзина пустая</p>}
 
         {cart.map((item) => (
-          <div
-            key={item.productId}
-            style={{
-              marginBottom: "12px",
-            }}
-          >
+          <div key={item.productId} className="cart-item">
             <strong>{item.name}</strong>
 
             <p>
               {item.quantity} × {item.price} ₽
             </p>
 
-            <button
-              onClick={() =>
-                removeFromCart(item.productId)
-              }
-            >
-              Удалить
-            </button>
+            <button onClick={() => removeFromCart(item.productId)}>Удалить</button>
           </div>
         ))}
 
@@ -167,9 +133,7 @@ export default function POSPage() {
 
         <h3>Итого: {total} ₽</h3>
 
-        <button onClick={handleCheckout}>
-          Оформить заказ
-        </button>
+        <button onClick={handleCheckout}>Оформить заказ</button>
       </div>
     </div>
   );

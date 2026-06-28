@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getUsers, deleteUser, createUser } from "../api/users";
+import "../style/UsersPage.css";
 
 type User = {
   id: number;
@@ -72,13 +73,7 @@ export default function UsersPage() {
   return (
     <div>
 
-      <div
-        style={{
-          marginBottom: 20,
-          display: "flex",
-          gap: 10,
-        }}
-      >
+      <div className="users-form">
         <input
           type="email"
           placeholder="Email"
@@ -103,18 +98,11 @@ export default function UsersPage() {
             setRole(e.target.value)
           }
         >
-          <option value="cashier">
-            Cashier
-          </option>
-
-          <option value="admin">
-            Admin
-          </option>
+          <option value="cashier">Cashier</option>
+          <option value="admin">Admin</option>
         </select>
 
-        <button onClick={handleCreate}>
-          Создать
-        </button>
+        <button onClick={handleCreate}>Создать</button>
       </div>
 
       <h1>Пользователи</h1>

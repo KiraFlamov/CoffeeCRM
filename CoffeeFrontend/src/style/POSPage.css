@@ -1,0 +1,23 @@
+.pos-page {
+  display: flex;
+  gap: 32px;
+}
+
+.pos-main { flex: 1; }
+
+.product-item {
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.pos-cart {
+  width: 360px;
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.cart-item { margin-bottom: 12px; }

@@ -1,0 +1,12 @@
+.orders-page { padding: 6px 0; }
+
+.order-card {
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.order-card h3 { margin: 0 0 6px 0; }

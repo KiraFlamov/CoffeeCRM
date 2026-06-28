@@ -1,29 +1,17 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import "../style/Layout.css";
 
 export default function Layout() {
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="app-layout">
       <Sidebar />
 
-      <div
-        style={{
-          flex: 1,
-        }}
-      >
+      <div className="app-content">
         <Header />
 
-        <main
-          style={{
-            padding: "20px",
-          }}
-        >
+        <main className="app-main">
           <Outlet />
         </main>
       </div>

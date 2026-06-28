@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteProduct,
 } from "../api/products";
+import "../style/ProductsPage.css";
 
 type Product = {
   id: number;
@@ -76,10 +77,10 @@ export default function ProductsPage() {
   if (loading) return <h2>Загрузка...</h2>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="products-page">
       <h1>Products</h1>
 
-      <div style={{ marginBottom: 20 }}>
+      <div className="products-form">
         <input
           placeholder="Название"
           value={name}
@@ -95,16 +96,10 @@ export default function ProductsPage() {
           }
         />
 
-        <button onClick={handleCreate}>
-          Добавить
-        </button>
+        <button onClick={handleCreate}>Добавить</button>
       </div>
 
-      <table
-        border={1}
-        cellPadding={10}
-        style={{ width: "100%" }}
-      >
+      <table border={1} cellPadding={10} className="products-table">
         <thead>
           <tr>
             <th>ID</th>

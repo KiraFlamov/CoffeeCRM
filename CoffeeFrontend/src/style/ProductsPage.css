@@ -1,0 +1,7 @@
+.products-page { padding: 8px 0; }
+
+.products-form { margin-bottom: 18px; display: flex; gap: 8px; }
+
+.products-table { width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+.products-table td, .products-table th { background: var(--bg); }

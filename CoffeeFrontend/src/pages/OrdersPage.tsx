@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getOrders } from "../api/orders";
+import "../style/OrdersPage.css";
 
 type Order = {
   id: number;
@@ -32,24 +33,14 @@ export default function OrdersPage() {
   }, []);
 
   return (
-    <div>
+    <div className="orders-page">
       <h1>История заказов</h1>
 
       {orders.map((order) => (
-        <div
-          key={order.id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "12px",
-            marginBottom: "12px",
-            borderRadius: "8px",
-          }}
-        >
+        <div key={order.id} className="order-card">
           <h3>Заказ #{order.id}</h3>
 
-          <p>
-            {new Date(order.createdAt).toLocaleString()}
-          </p>
+          <p>{new Date(order.createdAt).toLocaleString()}</p>
 
           {order.items.map((item, index) => (
             <div key={index}>
@@ -59,9 +50,7 @@ export default function OrdersPage() {
 
           <hr />
 
-          <strong>
-            Итого: {order.total} ₽
-          </strong>
+          <strong>Итого: {order.total} ₽</strong>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import "../style/LoginPage.css";
 
 import { api } from "../api/api";
 import { useAuth } from "../context/useAuth";
@@ -44,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "100px auto" }}>
+    <div className="login-wrapper">
       <h1>CoffeeCRM</h1>
 
       <form onSubmit={handleLogin}>
@@ -55,9 +56,6 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <br />
-        <br />
-
         <input
           type="password"
           placeholder="Пароль"
@@ -65,13 +63,10 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <br />
-        <br />
-
         <button type="submit">Войти</button>
       </form>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="login-error">{error}</p>}
     </div>
   );
 }

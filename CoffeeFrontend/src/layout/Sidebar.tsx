@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import "../style/Sidebar.css";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -13,28 +14,12 @@ export default function Sidebar() {
   };
 
   return (
-    <aside
-      style={{
-        width: "220px",
-        background: "#1f2937",
-        color: "white",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <aside className="sidebar">
       <h2>CoffeeCRM</h2>
 
       <p>Role: {role}</p>
 
-      <nav
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          marginTop: "20px",
-        }}
-      >
+      <nav className="sidebar-nav">
         {role === "admin" && (
           <>
             <NavLink to="/dashboard">Dashboard</NavLink>
@@ -51,14 +36,7 @@ export default function Sidebar() {
         
       </nav>
 
-      <button
-        onClick={logout}
-        style={{
-          marginTop: "auto",
-          padding: "10px",
-          cursor: "pointer",
-        }}
-      >
+      <button onClick={logout} className="logout-btn">
         Logout
       </button>
     </aside>

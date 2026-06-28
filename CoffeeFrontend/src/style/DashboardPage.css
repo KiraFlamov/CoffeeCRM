@@ -1,0 +1,21 @@
+.dashboard {
+  padding: 10px 0;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-width: 160px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.card h3 { margin: 0 0 8px 0; }
+.card h2 { margin: 0; color: var(--accent); }

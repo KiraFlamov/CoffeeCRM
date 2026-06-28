@@ -1,0 +1,3 @@
+.users-form { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+
+.users-form input, .users-form select { min-width: 180px; }
