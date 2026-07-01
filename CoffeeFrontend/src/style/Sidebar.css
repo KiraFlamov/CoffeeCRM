@@ -1,53 +1,82 @@
 .sidebar {
-  width: 220px;
-  background: linear-gradient(180deg, #2b6ea3 0%, #1e4f75 100%);
+  width: 260px;
+  min-width: 260px;
+  background: linear-gradient(180deg, #3d76d0 0%, #1b4e8b 100%);
   color: #ffffff;
-  padding: 24px;
+  padding: 28px 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  gap: 18px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.12);
 }
 
-.sidebar h2 { font-size: 18px; margin: 0 0 6px 0; color: #ffffff; }
+.sidebar h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: #ffffff;
+}
 
-.sidebar p { font-size: 13px; color: rgba(255,255,255,0.95); }
+.sidebar p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .sidebar-nav a {
-  color: rgba(255,255,255,0.95);
-  padding: 8px 10px;
-  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 12px 14px;
+  border-radius: 14px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.sidebar-nav a.active, .sidebar-nav a:hover {
-  background: rgba(255,255,255,0.15);
+.sidebar-nav a.active,
+.sidebar-nav a:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateX(2px);
 }
 
 .logout-btn {
   margin-top: auto;
   padding: 12px 16px;
   cursor: pointer;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   color: inherit;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 220px;
+  z-index: 20;
 }
 
 .logout-btn:hover {
-  background: #dc2626; /* red-600 */
+  background: #ff4d4d;
   color: white;
-  border-color: #dc2626;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  border-color: #ff4d4d;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    border-radius: 0;
+    padding: 20px;
+  }
+
+  .logout-btn {
+    position: static;
+    width: 100%;
+  }
 }

@@ -89,12 +89,13 @@ export default function ProductsPage() {
 
   return (
     <div className="products-page">
-      <h1>Products</h1>
+      <h1>Товары</h1>
 
-      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      {error && <div className="form-error">{error}</div>}
 
       <div className="products-form">
         <input
+          type="text"
           placeholder="Название"
           value={name}
           onChange={(e) => setName(e.target.value)}

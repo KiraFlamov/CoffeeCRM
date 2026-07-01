@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard">
-      <h1>Dashboard</h1>
+      <h1>Дашборд</h1>
 
       <div className="dashboard-cards">
         <Card title="Товары" value={data.products} />

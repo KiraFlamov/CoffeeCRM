@@ -35,6 +35,8 @@ export default function POSPage() {
   }, []);
 
   const addToCart = (product: Product) => {
+    setError("");
+
     setCart((prev) => {
       const existing = prev.find(
         (item) => item.productId === product.id
@@ -76,7 +78,7 @@ export default function POSPage() {
           item.productId === productId
             ? {
                 ...item,
-                quantity: Math.max(1, item.quantity + delta),
+                quantity: item.quantity + delta,
               }
             : item
         )
@@ -113,47 +115,50 @@ export default function POSPage() {
   };
 
   return (
-    <div className="pos-page">
-      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+    <div className="pos-page-wrapper">
+      <h1>Товары</h1>
 
-      <div className="pos-main">
-        <h2>Товары</h2>
+      <div className="pos-page">
+        <div className="pos-main">
+          {products.map((product) => (
+            <div key={product.id} className="product-item">
+              <h4>{product.name}</h4>
 
-        {products.map((product) => (
-          <div key={product.id} className="product-item">
-            <h4>{product.name}</h4>
+              <p>{product.price} ₽</p>
 
-            <p>{product.price} ₽</p>
-
-            <button onClick={() => addToCart(product)}>Добавить</button>
-          </div>
-        ))}
-      </div>
-
-      <div className="pos-cart">
-        <h2>Корзина</h2>
-
-        {cart.length === 0 && <p>Корзина пустая</p>}
-
-        {cart.map((item) => (
-          <div key={item.productId} className="cart-item">
-            <strong>{item.name}</strong>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <button onClick={() => updateQuantity(item.productId, -1)}>−</button>
-              <span>{item.quantity} × {item.price} ₽</span>
-              <button onClick={() => updateQuantity(item.productId, 1)}>+</button>
+              <button onClick={() => addToCart(product)}>Добавить</button>
             </div>
+          ))}
+        </div>
 
-            <button onClick={() => removeFromCart(item.productId)}>Удалить</button>
+        <div className="pos-cart">
+          <h2>Корзина</h2>
+
+          {error && <div className="form-error">{error}</div>}
+          {cart.length === 0 && <p>Корзина пустая</p>}
+
+          <div className="cart-items">
+            {cart.map((item) => (
+              <div key={item.productId} className="cart-item">
+                <strong>{item.name}</strong>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                  <button onClick={() => updateQuantity(item.productId, -1)}>−</button>
+                  <span>{item.quantity} × {item.price} ₽</span>
+                  <button onClick={() => updateQuantity(item.productId, 1)}>+</button>
+                </div>
+
+                <button onClick={() => removeFromCart(item.productId)}>Удалить</button>
+              </div>
+            ))}
           </div>
-        ))}
 
-        <hr />
-
-        <h3>Итого: {total} ₽</h3>
-
-        <button onClick={handleCheckout}>Оформить заказ</button>
+          <div className="cart-footer">
+            <hr />
+            <h3>Итого: {total} ₽</h3>
+            <button onClick={handleCheckout}>Оформить заказ</button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -81,7 +81,9 @@ export default function UsersPage() {
   return (
     <div>
 
-      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+      {error && <div className="form-error">{error}</div>}
+
+      <h1>Пользователи</h1>
 
       <div className="users-form">
         <input
@@ -114,8 +116,6 @@ export default function UsersPage() {
 
         <button onClick={handleCreate}>Создать</button>
       </div>
-
-      <h1>Пользователи</h1>
 
       <table>
         <thead>

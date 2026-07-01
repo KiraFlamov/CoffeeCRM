@@ -22,22 +22,22 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         {role === "admin" && (
           <>
-            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/dashboard">Дашборд</NavLink>
 
-            <NavLink to="/products">Products</NavLink>
+            <NavLink to="/products">Товары</NavLink>
 
-            <NavLink to="/users">Users</NavLink>
+            <NavLink to="/users">Пользователи</NavLink>
           </>
         )}
 
-      <NavLink to="/orders">Orders</NavLink>
+      <NavLink to="/orders">Заказы</NavLink>
       
-      <NavLink to="/pos">POS</NavLink>
+      <NavLink to="/pos">Касса</NavLink>
         
       </nav>
 
       <button onClick={logout} className="logout-btn">
-        Logout
+        Выйти
       </button>
     </aside>
   );

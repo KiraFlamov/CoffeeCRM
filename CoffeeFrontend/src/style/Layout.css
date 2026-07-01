@@ -1,7 +1,7 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
-  background: var(--bg);
+  background: transparent;
 }
 
 .app-content {
@@ -11,8 +11,18 @@
 }
 
 .app-main {
-  padding: 28px;
-  max-width: 100%;
-  margin: 0 auto;
+  padding: 28px 32px;
   width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .app-main {
+    padding: 20px;
+  }
 }
