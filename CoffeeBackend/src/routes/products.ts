@@ -103,6 +103,15 @@ router.delete("/:id", async (req, res) => {
       where: { id },
     });
 
+    // Удаляем пустые заказы (без позиций)
+    await prisma.order.deleteMany({
+      where: {
+        items: {
+          none: {},
+        },
+      },
+    });
+
     res.json({
       message: "Товар успешно удалён",
     });

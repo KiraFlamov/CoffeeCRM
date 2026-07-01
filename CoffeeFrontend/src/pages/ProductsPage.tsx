@@ -15,8 +15,9 @@ type Product = {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState("");
-  const [price, setPrice] = useState<number>(0);
+  const [price, setPrice] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchProducts = async () => {
     try {
@@ -56,15 +57,25 @@ export default function ProductsPage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!name || !price) return;
+    setError("");
+
+    if (!name.trim()) {
+      setError("Введите название товара");
+      return;
+    }
+
+    if (!price) {
+      setError("Введите цену товара");
+      return;
+    }
 
     await createProduct({
       name,
-      price,
+      price: Number(price),
     });
 
     setName("");
-    setPrice(0);
+    setPrice("");
 
     await fetchProducts();
   };
@@ -80,6 +91,8 @@ export default function ProductsPage() {
     <div className="products-page">
       <h1>Products</h1>
 
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+
       <div className="products-form">
         <input
           placeholder="Название"
@@ -92,7 +105,7 @@ export default function ProductsPage() {
           placeholder="Цена"
           value={price}
           onChange={(e) =>
-            setPrice(Number(e.target.value))
+            setPrice(e.target.value)
           }
         />
 

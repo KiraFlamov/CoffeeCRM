@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "cleanup:orders": "ts-node scripts/cleanupEmptyOrders.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

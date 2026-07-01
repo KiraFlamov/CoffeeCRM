@@ -13,16 +13,23 @@ export default function UsersPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("cashier");
+  const [error, setError] = useState("");
 
   const handleCreate = async () => {
+    setError("");
 
     if (!email.trim()) {
-      alert("Введите email");
+      setError("Введите email");
       return;
     }
 
     if (!password.trim()) {
-      alert("Введите пароль");
+      setError("Введите пароль");
+      return;
+    }
+
+    if (password.length < 4) {
+      setError("Пароль должен быть минимум 4 символа");
       return;
     }
 
@@ -38,9 +45,10 @@ export default function UsersPage() {
       setEmail("");
       setPassword("");
       setRole("cashier");
+      setError("");
     } catch (error) {
       console.error(error);
-      alert("Ошибка создания пользователя");
+      setError("Ошибка создания пользователя");
     }
   };
 
@@ -72,6 +80,8 @@ export default function UsersPage() {
 
   return (
     <div>
+
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
 
       <div className="users-form">
         <input

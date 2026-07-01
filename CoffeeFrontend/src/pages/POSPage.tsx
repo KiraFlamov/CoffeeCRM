@@ -19,6 +19,7 @@ type CartItem = {
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,14 +69,31 @@ export default function POSPage() {
     );
   };
 
+  const updateQuantity = (productId: number, delta: number) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.productId === productId
+            ? {
+                ...item,
+                quantity: Math.max(1, item.quantity + delta),
+              }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
   const handleCheckout = async () => {
+    setError("");
+
     if (cart.length === 0) {
-      alert("Корзина пустая");
+      setError("Корзина пустая");
       return;
     }
 
@@ -87,17 +105,17 @@ export default function POSPage() {
         }))
       );
 
-      alert("Заказ создан");
-
       setCart([]);
     } catch (error) {
       console.error(error);
-      alert("Ошибка создания заказа");
+      setError("Ошибка создания заказа");
     }
   };
 
   return (
     <div className="pos-page">
+      {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+
       <div className="pos-main">
         <h2>Товары</h2>
 
@@ -121,9 +139,11 @@ export default function POSPage() {
           <div key={item.productId} className="cart-item">
             <strong>{item.name}</strong>
 
-            <p>
-              {item.quantity} × {item.price} ₽
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              <button onClick={() => updateQuantity(item.productId, -1)}>−</button>
+              <span>{item.quantity} × {item.price} ₽</span>
+              <button onClick={() => updateQuantity(item.productId, 1)}>+</button>
+            </div>
 
             <button onClick={() => removeFromCart(item.productId)}>Удалить</button>
           </div>
