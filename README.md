@@ -3,16 +3,44 @@
 **Full-stack приложение для управления кофейней (POS система)** с авторизацией, разграничением ролей и управлением товарами и заказами.
 
 ##  Содержание
+- [Скриншоты](#скриншоты)
 - [Возможности](#возможности)
 - [Технологии](#технологии)
-- [Предварительные требования](#предварительные-требования)
 - [Установка](#установка)
 - [Запуск](#запуск)
 - [Структура проекта](#структура-проекта)
 - [Переменные окружения](#переменные-окружения)
 - [API Endpoints](#api-endpoints)
 - [Роли и разрешения](#роли-и-разрешения)
-- [Решение проблем](#решение-проблем)
+- [Дальнейшие улучшения](#дальнейшие-улучшения)
+- [Автор](#автор)
+
+
+## Скриншоты
+
+### Логин
+
+<img src="screenshots/login.png" width="700"/>
+
+### Товары
+
+<img src="screenshots/products.png" width="700"/>
+
+### POS
+
+<img src="screenshots/pos.png" width="700"/>
+
+### Заказы
+
+<img src="screenshots/orders.png" width="700"/>
+
+### Пользователи
+
+<img src="screenshots/users.png" width="700"/>
+
+### Дашборд
+
+<img src="screenshots/dashboard.png" width="700"/>
 
 ## Возможности
 
@@ -48,20 +76,14 @@
 | JWT | - | Аутентификация |
 | bcrypt | - | Хеширование пароля |
 
-##  Предварительные требования
-
-- **Node.js** (v18 или выше)
-- **npm** или **yarn**
-- **PostgreSQL** (локально или Docker)
-- **Git** (опционально)
 
 ##  Установка
 
 ### 1. Клонирование репозитория
 
 ```bash
-git clone <repository-url>
-cd "d:/REACT APPS/CoffeeCRM"
+git clone https://github.com/KiraFlamov/CoffeeCRM.git
+cd "CoffeeCRM"
 ```
 
 ### 2. Backend установка
@@ -124,30 +146,31 @@ Frontend будет доступен на: **http://localhost:5173**
 CoffeeCRM/
 ├── CoffeeBackend/
 │   ├── src/
-│   │   ├── index.ts              # Entry point
+│   │   ├── index.ts              # Входная точка
 │   │   ├── controllers/          # Обработчики запросов
-│   │   ├── middleware/           # Express middleware
+│   │   ├── middleware/           # Промежуточные обработчики Express
 │   │   ├── routes/               # API маршруты
 │   │   └── prisma/
 │   │       └── client.ts         # Prisma клиент
 │   ├── prisma/
-│   │   ├── schema.prisma         # DB схема
+│   │   ├── schema.prisma         # схема БД
 │   │   └── migrations/           # Миграции
-│   ├── package.json
-│   └── tsconfig.json
+│   ├── package.json              # Зависимости проекта и npm-скрипты
+│   └── tsconfig.json             # Конфигурация TypeScript
 │
 ├── CoffeeFrontend/
 │   ├── src/
 │   │   ├── pages/                # Страницы приложения
 │   │   ├── components/           # Переиспользуемые компоненты
 │   │   ├── api/                  # API запросы
-│   │   ├── context/              # React Context (Auth)
-│   │   ├── layout/               # Основной Layout
+│   │   ├── context/              # Контекст авторизации (Auth)
+│   │   ├── layout/               # Основной Layout (обертка страниц)
 │   │   └── style/                # CSS файлы
-│   ├── package.json
-│   └── vite.config.ts
+│   ├── package.json              # Зависимости проекта и npm-скрипты
+│   └── vite.config.ts            # Конфигурация Vite (сборка проекта)
 │
 └── README.md
+└── screenshots/
 ```
 
 ##  Переменные окружения
@@ -159,12 +182,10 @@ CoffeeCRM/
 DATABASE_URL="postgresql://user:password@localhost:5432/coffee_crm"
 
 # JWT
-JWT_SECRET="your-super-secret-key-change-in-production"
-JWT_EXPIRATION="7d"
+JWT_SECRET="your-secret-key"
 
 # Сервер
 PORT=3000
-NODE_ENV="development"
 ```
 
 ### Frontend (.env)
@@ -209,25 +230,19 @@ VITE_API_URL="http://localhost:3000"
 | Управление пользователями | ✅ | ❌ |
 | Доступ к панели администратора | ✅ | ❌ |
 
-##  Решение проблем
+##  Дальнейшие улучшения
 
-### Ошибка: "DATABASE_URL не установлена"
-- Убедитесь, что `.env` файл создан в папке `CoffeeBackend`
-- Проверьте, что все переменные окружения указаны правильно
+- [ ] Поиск товаров (Search products)
+- [ ] Пагинация в списках товаров и заказов
+- [ ] Редактирование уже созданных заказов
+- [ ] Фильтрация и аналитика продаж (по дате, сумме, кассиру)
+- [ ] Валидация данных на фронтенде и бэкенде
+- [ ] Покрытие основных API тестами (unit/integration tests)
+- [ ] Улучшение безопасности (refresh tokens, защита JWT)
+- [ ] Docker-контейнеризация проекта
+- [ ] Настройка CI/CD (GitHub Actions)
+- [ ] Рефакторинг архитектуры (улучшение слоёв API)
 
-### Ошибка: "Не удается подключиться к PostgreSQL"
-- Убедитесь, что PostgreSQL запущен
-- Проверьте учетные данные в `DATABASE_URL`
-- Убедитесь, что база данных существует
+## Автор
 
-### Ошибка при миграции: "Migration failed"
-```bash
-# Попробуйте очистить и пересоздать:
-npx prisma migrate reset
-npx prisma migrate dev
-```
-
-### Frontend не может подключиться к Backend
-- Проверьте, что Backend запущен на `http://localhost:3000`
-- Убедитесь, что `VITE_API_URL` указывает на правильный адрес
-- Проверьте CORS настройки в Backend
+Проект разработан как учебный full-stack pet project для демонстрации навыков React + Node.js разработки.
