@@ -1,42 +1,46 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import "../style/Sidebar.css";
+
+const roleLabels = {
+  admin: "Администратор",
+  cashier: "Кассир",
+} as const;
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  const role = localStorage.getItem("role");
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-
-    navigate("/");
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
   };
+
+  if (!user) return null;
 
   return (
     <aside className="sidebar">
       <h2>CoffeeCRM</h2>
 
-      <p>Role: {role}</p>
+      <div className="sidebar-user">
+        <p className="sidebar-email">{user.email}</p>
+        <p>{roleLabels[user.role]}</p>
+      </div>
 
       <nav className="sidebar-nav">
-        {role === "admin" && (
+        {user.role === "admin" && (
           <>
             <NavLink to="/dashboard">Дашборд</NavLink>
-
             <NavLink to="/products">Товары</NavLink>
-
             <NavLink to="/users">Пользователи</NavLink>
           </>
         )}
 
-      <NavLink to="/orders">Заказы</NavLink>
-      
-      <NavLink to="/pos">Касса</NavLink>
-        
+        <NavLink to="/orders">Заказы</NavLink>
+        <NavLink to="/pos">Касса</NavLink>
       </nav>
 
-      <button onClick={logout} className="logout-btn">
+      <button onClick={handleLogout} className="logout-btn">
         Выйти
       </button>
     </aside>

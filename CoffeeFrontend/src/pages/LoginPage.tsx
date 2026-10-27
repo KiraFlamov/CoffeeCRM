@@ -1,46 +1,39 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { Navigate, useNavigate } from "react-router-dom";
 import "../style/LoginPage.css";
 
-import { api } from "../api/api";
+import { login as loginRequest } from "../api/auth";
 import { useAuth } from "../context/useAuth";
-
-type JwtPayload = {
-  role: "admin" | "cashier" | string;
-  email?: string;
-  exp?: number;
-  iat?: number;
-};
+import { getErrorMessage } from "../utils/errors";
+import { homePath } from "../utils/homePath";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Уже вошли — сразу на рабочую страницу
+  if (user) {
+    return <Navigate to={homePath(user.role)} replace />;
+  }
 
   const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
     try {
-      const response = await api.post("/auth/login", {
-        email,
-        password,
-      });
-
-      const decoded = jwtDecode<JwtPayload>(response.data.token);
-
-      login(response.data.token, decoded.role);
-
-      if (decoded.role === "admin") {
-        navigate("/dashboard");
-      } else {
-        navigate("/pos");
-      }
-    } catch {
-      setError("Неверный логин или пароль");
+      const { token, user } = await loginRequest(email, password);
+      login(token, user);
+      navigate(homePath(user.role), { replace: true });
+    } catch (err) {
+      setError(getErrorMessage(err, "Не удалось войти"));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -50,8 +43,10 @@ export default function LoginPage() {
 
       <form onSubmit={handleLogin}>
         <input
-          type="text"
+          type="email"
           placeholder="Email"
+          autoComplete="username"
+          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -59,11 +54,15 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Пароль"
+          autoComplete="current-password"
+          required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Войти</button>
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Вход..." : "Войти"}
+        </button>
       </form>
 
       {error && <p className="login-error">{error}</p>}

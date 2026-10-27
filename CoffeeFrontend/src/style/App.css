@@ -284,3 +284,20 @@ table td button {
     flex-direction: column;
   }
 }
+
+a.btn {
+  text-decoration: none;
+}
+
+.not-found {
+  margin: 15vh auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.not-found h1 {
+  margin: 0;
+}

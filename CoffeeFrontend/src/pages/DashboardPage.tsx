@@ -1,36 +1,22 @@
 import { useEffect, useState } from "react";
 import { getDashboard } from "../api/dashboard";
+import { getErrorMessage } from "../utils/errors";
+import { formatMoney } from "../utils/money";
+import type { DashboardData } from "../types";
 import "../style/DashboardPage.css";
-
-type DashboardData = {
-  products: number;
-  orders: number;
-  revenue: number;
-  averageCheck: number;
-};
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const result = await getDashboard();
-        setData(result);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    getDashboard()
+      .then(setData)
+      .catch((err) => setError(getErrorMessage(err, "Ошибка загрузки дашборда")));
   }, []);
 
-  if (loading) return <h2>Загрузка...</h2>;
-
-  if (!data) return <h2>Ошибка загрузки</h2>;
+  if (error) return <div className="form-error">{error}</div>;
+  if (!data) return <h2>Загрузка...</h2>;
 
   return (
     <div className="dashboard">
@@ -39,20 +25,14 @@ export default function DashboardPage() {
       <div className="dashboard-cards">
         <Card title="Товары" value={data.products} />
         <Card title="Заказы" value={data.orders} />
-        <Card title="Выручка" value={`${data.revenue} ₽`} />
-        <Card title="Средний чек" value={`${data.averageCheck} ₽`} />
+        <Card title="Выручка" value={formatMoney(data.revenue)} />
+        <Card title="Средний чек" value={formatMoney(data.averageCheck)} />
       </div>
     </div>
   );
 }
 
-function Card({
-  title,
-  value,
-}: {
-  title: string;
-  value: string | number;
-}) {
+function Card({ title, value }: { title: string; value: string | number }) {
   return (
     <div className="card">
       <h3>{title}</h3>

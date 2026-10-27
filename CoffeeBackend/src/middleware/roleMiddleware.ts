@@ -1,21 +1,19 @@
-import { Request, Response, NextFunction } from "express";
+import { RequestHandler } from "express";
+import { Role } from "@prisma/client";
+import { HttpError } from "../utils/httpError";
 
-export const roleMiddleware = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
-
-    if (!user) {
-      return res.status(401).json({
-        message: "Нет пользователя",
-      });
+export const requireRole =
+  (...roles: Role[]): RequestHandler =>
+  (req, _res, next) => {
+    if (!req.user) {
+      next(new HttpError(401, "Требуется авторизация"));
+      return;
     }
 
-    if (!roles.includes(user.role)) {
-      return res.status(403).json({
-        message: "Нет доступа",
-      });
+    if (!roles.includes(req.user.role)) {
+      next(new HttpError(403, "Недостаточно прав"));
+      return;
     }
 
     next();
   };
-};

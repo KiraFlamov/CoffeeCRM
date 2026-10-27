@@ -100,3 +100,15 @@
     overflow-x: auto;
   }
 }
+.products-table td.actions {
+  width: 300px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.products-table td input {
+  padding: 8px 12px;
+}

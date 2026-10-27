@@ -80,3 +80,16 @@
     width: 100%;
   }
 }
+
+.sidebar-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-email {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

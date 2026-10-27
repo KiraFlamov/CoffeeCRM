@@ -1,28 +1,25 @@
+import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import NotFoundPage from "../pages/NotFoundPage";
+import { homePath } from "../utils/homePath";
+import type { Role } from "../types";
 
 export default function ProtectedRoute({
   children,
-  role,
+  roles,
 }: {
-  children: React.ReactNode;
-  role?: string;
+  children: ReactNode;
+  roles?: Role[];
 }) {
-  const { token, role: userRole } = useAuth();
+  const { user } = useAuth();
 
-  if (!token) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  if (role) {
-    const hasAccess =
-      userRole === role ||
-      userRole === "admin";
-
-    if (!hasAccess) {
-      return <NotFoundPage />;
-    }
+  // Нет доступа — отправляем на стартовую страницу своей роли
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to={homePath(user.role)} replace />;
   }
 
   return <>{children}</>;

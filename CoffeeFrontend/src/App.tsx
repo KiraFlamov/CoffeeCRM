@@ -7,6 +7,7 @@ import ProductsPage from "./pages/ProductsPage";
 import OrdersPage from "./pages/OrdersPage";
 import POSPage from "./pages/POSPage";
 import UsersPage from "./pages/UsersPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./layout/Layout";
@@ -18,61 +19,43 @@ function App() {
         {/* публичная страница */}
         <Route path="/" element={<LoginPage />} />
 
+        {/* всё остальное — только после входа */}
         <Route
-          path="/dashboard"
           element={
-            <ProtectedRoute role="admin">
+            <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<DashboardPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <ProductsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/pos" element={<POSPage />} />
         </Route>
 
-        <Route
-          path="/products"
-          element={
-            <ProtectedRoute role="admin">
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<ProductsPage />} />
-        </Route>
-
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoute role="cashier">
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<OrdersPage />} />
-        </Route>
-
-        <Route
-          path="/pos"
-          element={
-            <ProtectedRoute role="cashier">
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<POSPage />} />
-        </Route>
-        
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute role="admin">
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<UsersPage />} />
-        </Route>
-
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

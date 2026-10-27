@@ -1,21 +1,33 @@
 import { useEffect, useState } from "react";
 import { getUsers, deleteUser, createUser } from "../api/users";
+import { useAuth } from "../context/useAuth";
+import { getErrorMessage } from "../utils/errors";
+import type { Role, User } from "../types";
 import "../style/UsersPage.css";
 
-type User = {
-  id: number;
-  email: string;
-  role: string;
+const roleLabels: Record<Role, string> = {
+  admin: "Администратор",
+  cashier: "Кассир",
 };
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const { user: currentUser } = useAuth();
+
+  const [users, setUsers] = useState<User[] | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("cashier");
+  const [role, setRole] = useState<Role>("cashier");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const handleCreate = async () => {
+  useEffect(() => {
+    getUsers()
+      .then(setUsers)
+      .catch((err) => setError(getErrorMessage(err, "Ошибка загрузки пользователей")));
+  }, []);
+
+  const handleCreate = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError("");
 
     if (!email.trim()) {
@@ -23,127 +35,116 @@ export default function UsersPage() {
       return;
     }
 
-    if (!password.trim()) {
-      setError("Введите пароль");
+    if (password.length < 4) {
+      setError("Пароль должен быть не короче 4 символов");
       return;
     }
 
-    if (password.length < 4) {
-      setError("Пароль должен быть минимум 4 символа");
-      return;
-    }
+    setBusy(true);
 
     try {
-      const user = await createUser({
-        email,
-        password,
-        role,
-      });
+      const user = await createUser({ email, password, role });
 
-      setUsers((prev) => [...prev, user]);
-
+      setUsers((prev) => [...(prev ?? []), user]);
       setEmail("");
       setPassword("");
       setRole("cashier");
-      setError("");
-    } catch (error) {
-      console.error(error);
-      setError("Ошибка создания пользователя");
+    } catch (err) {
+      setError(getErrorMessage(err, "Ошибка создания пользователя"));
+    } finally {
+      setBusy(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Удалить пользователя?");
+  const handleDelete = async (user: User) => {
+    if (!window.confirm(`Удалить пользователя ${user.email}?`)) return;
 
-    if (!confirmed) return;
+    setError("");
+    setBusy(true);
 
     try {
-      await deleteUser(id);
-
-      setUsers((prev) =>
-        prev.filter((user) => user.id !== id)
-      );
-    } catch (error) {
-      console.error(error);
-      alert("Ошибка удаления");
+      await deleteUser(user.id);
+      setUsers((prev) => (prev ?? []).filter((item) => item.id !== user.id));
+    } catch (err) {
+      setError(getErrorMessage(err, "Ошибка удаления пользователя"));
+    } finally {
+      setBusy(false);
     }
   };
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const data = await getUsers();
-      setUsers(data);
-    };
-
-    fetchUsers();
-  }, []);
 
   return (
     <div>
+      <h1>Пользователи</h1>
 
       {error && <div className="form-error">{error}</div>}
 
-      <h1>Пользователи</h1>
-
-      <div className="users-form">
+      <form className="users-form" onSubmit={handleCreate}>
         <input
           type="email"
           placeholder="Email"
+          autoComplete="off"
           value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          placeholder="Password"
           type="password"
+          placeholder="Пароль"
+          autoComplete="new-password"
           value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
+          onChange={(e) => setPassword(e.target.value)}
         />
 
-        <select
-          value={role}
-          onChange={(e) =>
-            setRole(e.target.value)
-          }
-        >
-          <option value="cashier">Cashier</option>
-          <option value="admin">Admin</option>
+        <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+          <option value="cashier">{roleLabels.cashier}</option>
+          <option value="admin">{roleLabels.admin}</option>
         </select>
 
-        <button onClick={handleCreate}>Создать</button>
-      </div>
+        <button type="submit" disabled={busy}>
+          Создать
+        </button>
+      </form>
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Роль</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-              <td>
-                <button
-                  onClick={() => handleDelete(user.id)}
-                >
-                  Удалить
-                </button>
-              </td>
+      {!users ? (
+        !error && <h2>Загрузка...</h2>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Роль</th>
+              <th>Действия</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {users.map((user) => {
+              // Сервер не даёт удалять администраторов и самого себя
+              const canDelete = user.role !== "admin" && user.id !== currentUser?.id;
+
+              return (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.email}</td>
+                  <td>{roleLabels[user.role]}</td>
+                  <td>
+                    {canDelete && (
+                      <button
+                        className="btn danger"
+                        disabled={busy}
+                        onClick={() => handleDelete(user)}
+                      >
+                        Удалить
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

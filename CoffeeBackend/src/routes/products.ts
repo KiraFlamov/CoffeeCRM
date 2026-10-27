@@ -1,127 +1,24 @@
 import { Router } from "express";
-import { prisma } from "../prisma/client";
-import { getProducts } from "../controllers/productController";
+import {
+  createProduct,
+  deleteProduct,
+  getProduct,
+  getProducts,
+  updateProduct,
+} from "../controllers/productController";
+import { requireAuth } from "../middleware/authMiddleware";
+import { requireRole } from "../middleware/roleMiddleware";
+import { validateBody } from "../middleware/validate";
+import { createProductSchema, updateProductSchema } from "../schemas/product";
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.get("/", getProducts);
-
-router.post("/", async (req, res) => {
-  try {
-    const { name, price } = req.body;
-
-    const product = await prisma.product.create({
-      data: {
-        name,
-        price,
-      },
-    });
-
-    res.status(201).json(product);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Ошибка при создании товара",
-    });
-  }
-});
-
-router.get("/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Товар не найден",
-      });
-    }
-
-    res.json(product);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Ошибка при получении товара",
-    });
-  }
-});
-
-router.put("/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    const { name, price } = req.body;
-
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Товар не найден",
-      });
-    }
-
-    const updatedProduct = await prisma.product.update({
-      where: { id },
-      data: {
-        name,
-        price,
-      },
-    });
-
-    res.json(updatedProduct);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Ошибка при обновлении товара",
-    });
-  }
-});
-
-router.delete("/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Товар не найден",
-      });
-    }
-
-    await prisma.product.delete({
-      where: { id },
-    });
-
-    // Удаляем пустые заказы (без позиций)
-    await prisma.order.deleteMany({
-      where: {
-        items: {
-          none: {},
-        },
-      },
-    });
-
-    res.json({
-      message: "Товар успешно удалён",
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Ошибка при удалении товара",
-    });
-  }
-});
+router.get("/:id", getProduct);
+router.post("/", requireRole("admin"), validateBody(createProductSchema), createProduct);
+router.put("/:id", requireRole("admin"), validateBody(updateProductSchema), updateProduct);
+router.delete("/:id", requireRole("admin"), deleteProduct);
 
 export default router;

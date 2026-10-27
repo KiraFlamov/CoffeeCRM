@@ -1,29 +1,38 @@
-import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { config } from "../config";
+import { prisma } from "../prisma/client";
+import { asyncHandler } from "../utils/asyncHandler";
+import { HttpError } from "../utils/httpError";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+type TokenPayload = jwt.JwtPayload & { id: number };
 
-export const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// Проверяет JWT и подгружает актуального пользователя из БД:
+// удалённый пользователь или сменённая роль применяются сразу, а не после истечения токена
+export const requireAuth = asyncHandler(async (req, _res, next) => {
+  const header = req.headers.authorization;
+  const token = header?.startsWith("Bearer ") ? header.slice(7) : undefined;
 
   if (!token) {
-    return res.status(401).json({
-      message: "Нет токена",
-    });
+    throw new HttpError(401, "Требуется авторизация");
   }
+
+  let payload: TokenPayload;
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    (req as any).user = decoded;
-
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      message: "Неверный токен",
-    });
+    payload = jwt.verify(token, config.JWT_SECRET) as TokenPayload;
+  } catch {
+    throw new HttpError(401, "Сессия недействительна или истекла, войдите снова");
   }
-};
+
+  const user = await prisma.user.findUnique({
+    where: { id: payload.id },
+    select: { id: true, email: true, role: true },
+  });
+
+  if (!user) {
+    throw new HttpError(401, "Пользователь не найден");
+  }
+
+  req.user = user;
+  next();
+});

@@ -7,37 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  admin
+  cashier
+}
+
+// Все денежные значения хранятся в копейках (Int), чтобы избежать ошибок округления Float.
 model Product {
   id         Int         @id @default(autoincrement())
   name       String
-  price      Float
+  price      Int
+  // Товары не удаляются физически, чтобы не терять историю продаж
+  isActive   Boolean     @default(true)
 
   orderItems OrderItem[]
 }
 
 model Order {
   id        Int         @id @default(autoincrement())
-  total     Float
+  total     Int
   createdAt DateTime    @default(now())
 
   items     OrderItem[]
 }
 
 model OrderItem {
-  id        Int @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
 
   quantity  Int
+  // Снимок названия и цены на момент продажи
+  name      String
+  price     Int
 
   orderId   Int
   productId Int
 
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 }
 
 model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
-  role     String @default("cashier")
+  role     Role   @default(cashier)
 }
