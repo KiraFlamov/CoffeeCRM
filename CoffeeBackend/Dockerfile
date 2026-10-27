@@ -36,4 +36,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
 # Перед стартом применяем миграции; SEED_ON_START=true дополнительно создаёт
 # аккаунты и демо-товары (seed идемпотентен, существующие данные не трогает).
 # exec — чтобы Node получал SIGTERM напрямую и корректно завершался
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy &&if [ \"$SEED_ON_START\" = \"true\" ]; then node dist/prisma/seed.js; fi && exec node dist/src/index.js"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && if [ \"$SEED_ON_START\" = \"true\" ]; then node dist/prisma/seed.js; fi && exec node dist/src/index.js"]

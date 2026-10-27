@@ -25,7 +25,7 @@ services:
     environment:
       DATABASE_URL: postgresql://coffee:${POSTGRES_PASSWORD}@db:5432/coffeecrm
       JWT_SECRET: ${JWT_SECRET:?задайте JWT_SECRET в .env}
-      CLIENT_ORIGIN: http://localhost:${WEB_PORT:-8080}
+      CLIENT_ORIGIN: http://localhost:${WEB_PORT:-8080},http://127.0.0.1:${WEB_PORT:-8080}
       SEED_ON_START: "true"
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@test.com}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?задайте SEED_ADMIN_PASSWORD в .env}

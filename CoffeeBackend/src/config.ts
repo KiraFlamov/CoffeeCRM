@@ -10,8 +10,14 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
   // Сколько прокси стоит перед сервером (на Render/Railway обычно 1).
   // Нужно, чтобы req.ip был адресом клиента, а не балансировщика
-  TRUST_PROXY: z.coerce.number().int().min(0).default(0),
+  TRUST_PROXY: z.coerce.number().int().min(0).default(isBehindPaasProxy() ? 1 : 0),
 });
+
+// Render и Railway сами выставляют эти переменные. Если забыть TRUST_PROXY,
+// все запросы придут с IP балансировщика и лимит входа станет общим на всех
+function isBehindPaasProxy() {
+  return Boolean(process.env.RENDER || process.env.RAILWAY_ENVIRONMENT);
+}
 
 const parsed = envSchema.safeParse(process.env);
 
