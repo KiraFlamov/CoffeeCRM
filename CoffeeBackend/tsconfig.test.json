@@ -1,0 +1,9 @@
+{
+  // Проверка типов тестов (сборка по-прежнему из tsconfig.json)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true
+  },
+  "include": ["src", "tests"]
+}
