@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Новый push в ту же ветку отменяет устаревший прогон
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Тесты сами создают рядом базы coffeecrm_test и coffeecrm_e2e
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/coffeecrm
+
+jobs:
+  backend:
+    name: Backend — типы и тесты API
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: CoffeeBackend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: CoffeeBackend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+
+  frontend:
+    name: Frontend — линтер, юнит-тесты, сборка
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CoffeeFrontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: CoffeeFrontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            CoffeeBackend/package-lock.json
+            CoffeeFrontend/package-lock.json
+      - run: npm ci
+        working-directory: CoffeeBackend
+      - run: npm ci
+        working-directory: CoffeeFrontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: CoffeeFrontend
+      - run: npm run test:e2e
+        working-directory: CoffeeFrontend
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: CoffeeFrontend/test-results
+          retention-days: 7
+
+  docker:
+    name: Docker — сборка и смоук-тест
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: .env для compose
+        run: |
+          cat > .env <<'EOF'
+          POSTGRES_PASSWORD=ci-postgres
+          JWT_SECRET=ci-jwt-secret
+          SEED_ADMIN_PASSWORD=ci-admin
+          SEED_CASHIER_PASSWORD=ci-cashier
+          EOF
+      # --wait ждёт, пока healthcheck контейнеров станет healthy
+      - run: docker compose up -d --build --wait
+      - name: Проверка API, входа и фронтенда
+        run: |
+          curl -fsS http://localhost:3000/api/health
+          curl -fsS -X POST http://localhost:3000/api/auth/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"admin@test.com","password":"ci-admin"}' > /dev/null
+          curl -fsS http://localhost:8080/pos | grep -q '<div id="root">'
+      - name: Логи контейнеров
+        if: failure()
+        run: docker compose logs
+      - run: docker compose down -v
+        if: always()

@@ -3,12 +3,13 @@
     "target": "ES2020",
     "module": "Node16",
     "moduleResolution": "node16",
-    "rootDir": "./src",
+    // seed компилируется вместе с сервером, чтобы в Docker-образе не нужен был tsx
+    "rootDir": ".",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"]
+  "include": ["src", "prisma/seed.ts"]
 }

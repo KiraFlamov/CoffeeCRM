@@ -8,6 +8,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   // Можно указать несколько адресов через запятую
   CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
+  // Сколько прокси стоит перед сервером (на Render/Railway обычно 1).
+  // Нужно, чтобы req.ip был адресом клиента, а не балансировщика
+  TRUST_PROXY: z.coerce.number().int().min(0).default(0),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -4,17 +4,31 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// В production пароли по умолчанию не подставляются: их нужно задать явно,
+// чтобы на сервер случайно не попал аккаунт admin@test.com / test
+const password = (name: string) => {
+  const value = process.env[name];
+
+  if (value) return value;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(`${name} не задан: в production задайте пароли аккаунтов явно`);
+  }
+
+  return "test";
+};
+
 // Тестовые аккаунты стенда (совпадают с passwords.txt).
 // Для боевого запуска задайте свои значения через переменные окружения.
 const users: { email: string; password: string; role: Role }[] = [
   {
     email: process.env.SEED_ADMIN_EMAIL ?? "admin@test.com",
-    password: process.env.SEED_ADMIN_PASSWORD ?? "test",
+    password: password("SEED_ADMIN_PASSWORD"),
     role: "admin",
   },
   {
     email: process.env.SEED_CASHIER_EMAIL ?? "cashier@test.com",
-    password: process.env.SEED_CASHIER_PASSWORD ?? "test",
+    password: password("SEED_CASHIER_PASSWORD"),
     role: "cashier",
   },
 ];

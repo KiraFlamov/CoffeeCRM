@@ -1,0 +1,23 @@
+# Шаблон: при старте контейнера nginx подставляет сюда ${PORT}
+server {
+    listen ${PORT};
+    root /usr/share/nginx/html;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    # SPA: любые пути (/pos, /orders, ...) отдаём через index.html, маршрут решает React Router
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # index.html не кешируем, чтобы после деплоя сразу подтягивалась новая версия
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    # В именах файлов из assets/ есть хэш — их можно кешировать надолго
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+}

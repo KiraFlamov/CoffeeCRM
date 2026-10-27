@@ -8,6 +8,7 @@
 - [Технологии](#технологии)
 - [Тестовые аккаунты](#тестовые-аккаунты)
 - [Установка и запуск](#установка-и-запуск)
+- [Docker и деплой](#docker-и-деплой)
 - [Переменные окружения](#переменные-окружения)
 - [Тесты](#тесты)
 - [Структура проекта](#структура-проекта)
@@ -77,6 +78,7 @@
 | PostgreSQL | 14+ | База данных |
 | zod | 4 | Валидация запросов |
 | jsonwebtoken, bcrypt | — | Аутентификация, хеширование паролей |
+| express-rate-limit | 8 | Защита входа от перебора паролей |
 | Vitest, Supertest | 5, 7 | Интеграционные тесты API |
 
 ## Тестовые аккаунты
@@ -132,6 +134,52 @@ npm run dev                # http://localhost:5173
 
 Продакшен-сборка: `npm run build`. Готовые файлы появятся в `dist/`.
 
+## Docker и деплой
+
+### Локально через docker compose
+
+Нужен только Docker: Node.js и PostgreSQL ставить не надо.
+
+```bash
+cp .env.example .env          # задайте пароли и JWT_SECRET
+docker compose up -d --build
+```
+
+- фронтенд: http://localhost:8080
+- API: http://localhost:3000/api
+
+При старте контейнер API сам применяет миграции и создаёт аккаунты из `.env` вместе с демо-товарами. Данные базы хранятся в volume `pgdata`. Удалить их вместе с контейнерами: `docker compose down -v`.
+
+### Образы
+
+| Образ | Что внутри |
+|-------|-----------|
+| `CoffeeBackend/Dockerfile` | Node 24 Alpine, собранный `dist/` и production-зависимости. При старте выполняет `prisma migrate deploy`, при `SEED_ON_START=true` дополнительно запускает seed |
+| `CoffeeFrontend/Dockerfile` | nginx со статикой. `VITE_API_URL` передаётся как build arg: адрес API вшивается в бандл при сборке |
+
+### Деплой на PaaS (Render, Railway)
+
+Нужны три сервиса.
+
+1. **PostgreSQL** — управляемая база платформы. Её строку подключения передайте API как `DATABASE_URL`.
+2. **API** — Docker-сервис из папки `CoffeeBackend`.
+   - Переменные: `DATABASE_URL`, `JWT_SECRET`, `CLIENT_ORIGIN` (адрес фронтенда), `TRUST_PROXY=1`.
+   - Для первого запуска: `SEED_ON_START=true` и `SEED_*_PASSWORD`. В production seed не подставляет пароли по умолчанию.
+   - Health check: `/api/health`. `PORT` платформа задаёт сама.
+3. **Frontend** — Docker-сервис из папки `CoffeeFrontend`.
+   - Переменная `VITE_API_URL=https://<адрес API>/api`. Платформа передаст её при сборке образа.
+   - nginx слушает порт из `PORT`.
+   - Вместо Docker фронтенд можно выложить как Static Site: команда сборки `npm run build`, папка `dist`, rewrite всех путей на `/index.html`.
+
+### CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) запускается на каждый push в `main` и на каждый pull request:
+
+- **backend:** типы, сборка, тесты API на Postgres в сервис-контейнере;
+- **frontend:** линтер, юнит-тесты, сборка;
+- **e2e:** Playwright. Если тест упал, trace сохраняется в артефактах прогона;
+- **docker:** `docker compose up --build` и смоук-проверка: health, вход под seed-аккаунтом, отдача SPA.
+
 ## Переменные окружения
 
 ### Backend (`CoffeeBackend/.env`)
@@ -143,7 +191,9 @@ npm run dev                # http://localhost:5173
 | `JWT_EXPIRES_IN` | нет | Срок жизни токена, по умолчанию `1d` |
 | `PORT` | нет | Порт сервера, по умолчанию `3000` |
 | `CLIENT_ORIGIN` | нет | Адрес фронтенда для CORS, по умолчанию `http://localhost:5173`; несколько адресов — через запятую |
-| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_CASHIER_EMAIL`, `SEED_CASHIER_PASSWORD` | нет | Аккаунты для `npm run seed`, по умолчанию из `passwords.txt` |
+| `TRUST_PROXY` | нет | Число прокси перед сервером, по умолчанию `0`. На Render и Railway — `1`, иначе лимит попыток входа будет общим для всех пользователей |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_CASHIER_EMAIL`, `SEED_CASHIER_PASSWORD` | нет | Аккаунты для `npm run seed`. По умолчанию берутся из `passwords.txt`; при `NODE_ENV=production` пароли обязательны |
+| `SEED_ON_START` | нет | Только в Docker: `true` — запускать seed при старте контейнера |
 
 Если обязательная переменная не задана, сервер не запустится и напишет, какой именно не хватает.
 
@@ -182,7 +232,10 @@ npm run test:e2e
 
 ```
 CoffeeCRM/
+├── .github/workflows/ci.yml      # CI: тесты, сборка, Docker
+├── docker-compose.yml            # весь стек локально
 ├── CoffeeBackend/
+│   ├── Dockerfile
 │   ├── prisma/
 │   │   ├── schema.prisma         # схема БД
 │   │   ├── migrations/           # миграции
@@ -199,6 +252,8 @@ CoffeeCRM/
 │       └── utils/
 │
 ├── CoffeeFrontend/
+│   ├── Dockerfile                # сборка и nginx
+│   ├── nginx.conf.template
 │   ├── e2e/                      # E2E-сценарии Playwright
 │   └── src/
 │       ├── api/                  # запросы к API
@@ -286,8 +341,9 @@ CoffeeCRM/
 - [ ] Фильтрация и аналитика продаж (по дате, сумме, кассиру)
 - [x] Автотесты: API, юнит-тесты фронтенда, E2E
 - [ ] Refresh-токены
-- [ ] Docker-контейнеризация
-- [ ] CI/CD (GitHub Actions)
+- [x] Docker-контейнеризация
+- [x] CI (GitHub Actions)
+- [ ] Автодеплой после успешного CI
 
 ## Автор
 
